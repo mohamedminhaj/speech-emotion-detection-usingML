@@ -19,7 +19,7 @@ def main():
 
 @st.cache(show_spinner=False)
 def get_file_content_as_string(path):
-    url = 'https://raw.githubusercontent.com/your_username/your_repository/main/' + path  # Replace with actual URL
+    url = 'https://github.com/mohamedminhaj/speech-emotion-detection-usingML/tree/main/' + path  # Replace with actual URL
     response = urllib.request.urlopen(url)
     return response.read().decode('utf-8')
 
