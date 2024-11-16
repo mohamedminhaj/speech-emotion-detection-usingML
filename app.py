@@ -1,45 +1,64 @@
 import streamlit as st
-import librosa
 import numpy as np
+import librosa
+import urllib.request
+import tensorflow as tf
 from tensorflow.keras.models import load_model
 
-# Load the pre-trained model
-model = load_model('my_model.h5')
+def main():
+    selected_box = st.sidebar.selectbox(
+        'Choose an option ...',
+        ('Emotion Recognition', 'View Source Code')
+    )
 
-# Define emotion labels (make sure they match your model's output labels)
-emotions = {0: 'neutral', 1: 'calm', 2: 'happy', 3: 'sad', 4: 'angry', 5: 'fearful', 6: 'disgust', 7: 'surprised'}
+    if selected_box == 'Emotion Recognition':
+        st.sidebar.success('Try it yourself by uploading an audio file.')
+        application()
+    elif selected_box == 'View Source Code':
+        st.code(get_file_content_as_string('app.py'))
 
-# Preprocess the audio file
-def preprocess_audio(file):
-    # Load audio file with librosa
+@st.cache(show_spinner=False)
+def get_file_content_as_string(path):
+    url = 'https://raw.githubusercontent.com/your_username/your_repository/main/' + path  # Replace with actual URL
+    response = urllib.request.urlopen(url)
+    return response.read().decode('utf-8')
+
+@st.cache(show_spinner=False)
+def load_emotion_model():
+    model = load_model('my_model.h5')  # Ensure 'my_model.h5' is in the same directory or provide a valid path
+    return model
+
+def preprocess_audio_file(file):
     y, sr = librosa.load(file, sr=16000)
+    y = librosa.util.normalize(y)
 
-    # Add preprocessing steps like feature extraction (MFCC, chroma, etc.)
+    # Extract features
     mfcc = np.mean(librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40).T, axis=0)
     chroma = np.mean(librosa.feature.chroma_stft(y=y, sr=sr).T, axis=0)
     spectral_contrast = np.mean(librosa.feature.spectral_contrast(y=y, sr=sr).T, axis=0)
     zero_crossing_rate = np.mean(librosa.feature.zero_crossing_rate(y).T, axis=0)
     rms = np.mean(librosa.feature.rms(y=y).T, axis=0)
 
-    # Combine all features into a single feature vector
     features = np.hstack([mfcc, chroma, spectral_contrast, zero_crossing_rate, rms])
+    return features
 
-    # Return the features reshaped for the model input
-    return np.expand_dims(features, axis=0)
+def application():
+    model_load_state = st.text("Loading model...")
+    model = load_emotion_model()
+    model_load_state.text("Model loaded successfully!")
 
-# Streamlit title
-st.title('Audio Emotion Recognition')
+    file_to_be_uploaded = st.file_uploader("Choose an audio file...", type=['wav'])
+    if file_to_be_uploaded is not None:
+        st.audio(file_to_be_uploaded, format='audio/wav')
+        features = preprocess_audio_file(file_to_be_uploaded)
+        features = np.expand_dims(features, axis=0)
+        features = np.expand_dims(features, axis=-1)
 
-# Upload an audio file
-uploaded_file = st.file_uploader("Upload an audio file", type=["wav"])
+        prediction = model.predict(features)
+        predicted_emotion = np.argmax(prediction) + 1
+        emotions = {1: 'Neutral', 2: 'Calm', 3: 'Happy', 4: 'Sad', 5: 'Angry', 6: 'Fearful', 7: 'Disgust', 8: 'Surprised'}
 
-if uploaded_file is not None:
-    # Preprocess the uploaded audio file
-    features = preprocess_audio(uploaded_file)
-    
-    # Predict the emotion
-    prediction = model.predict(features)
-    
-    # Show the predicted emotion
-    predicted_emotion = emotions[np.argmax(prediction)]
-    st.write(f"Predicted Emotion: {predicted_emotion}")
+        st.write(f'Predicted Emotion: **{emotions[predicted_emotion]}**')
+
+if __name__ == "__main__":
+    main()
