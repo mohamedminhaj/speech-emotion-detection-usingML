@@ -1,7 +1,3 @@
-Here is your updated README markdown with the **How to Run** section removed, tailored for your repository structure as shown in the screenshot:
-
----
-
 ## Speech Emotion Detection Using Machine Learning
 
 This project implements a **Speech Emotion Recognition (SER)** system using machine learning techniques. The system processes audio files, extracts relevant features, and classifies the emotions expressed in speech using a deep learning model.
@@ -108,10 +104,3 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 
 **Author:**  
 [mohamedminhaj](https://github.com/mohamedminhaj)
-
----
-
-*Feel free to customize this README with more details about your dataset, results, or deployment instructions as needed!*
-
-[1] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/39224427/ced15e79-6d33-4377-9c14-8664715d731d/Updated_SER-3.ipynb
-[2] https://pplx-res.cloudinary.com/image/private/user_uploads/39224427/bcc1e5fc-0352-4a56-9517-79015140307b/image.jpg
